@@ -4,6 +4,13 @@ echo "Setting for SSH"
 KEY="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC4ZKdEOOwB0Z94sG0O0dw3UpsPjxM9PhV75TANbUPFMq60VZmzfNw28DPGLBfvMv3oICf8NFKZyFFzYFrRKL/6vWbXBlBEmv8q+SbRBJiqsPId/36lV9r/ZiA2BSOTSJGt0nTe/+5qj9a7p4wmHdO+lcogZ/58Tyb/mKysPRLYLbhhnkN1oN3DUAtWDX4XNaZvVmZWlZ+NfuuV45eYnYYmZlqnu6vtBsFGiJGdbCsGooWUD8vu1obqc9+P24ezlMTr3+t7BReWOc20RyjNhUd+Ta19tGNLl8UniCfbtcMG6yRiPzkIrATs9/69090y932axncrdCzXW90G5lEqNKKzjUTakdHcA+v+DNRAQDITXe2MwfvfAyxJnkU2wu/pT2EsWmQlll2ru6mZ76H27V5xnXFx8Qj31OTp4L+oEOx0wcaLpcg7lJsqGtTqsDXNDRe8dbb8FCfbpueE6pzA4GA/PwRR3I15JbDv+aXQIZiA4xKbebIP/hzPnFs+9oF081M= miuratomohiko@miuratoikonoMBP"
 echo $KEY >> ~/.ssh/authorized_keys
 
+# Add desktop environment
+sudo apt install -y --no-install-recommends ubuntu-desktop
+sudo apt install -y --no-install-recommends virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+
+echo "Add `vagrant` to Administrator"
+sudo usermod -a -G sudo vagrant
+
 echo "Setting for Docker"
 sudo apt-get remove docker docker-engine docker.io containerd runc
 sudo apt-get update
@@ -24,7 +31,9 @@ sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.0/docker-
 sudo chmod +x /usr/bin/docker-compose
 
 echo "Installing OpenJDK v11"
-sudo apt install openjdk-11-jdk-headless -y
+sudo apt install default-jdk default-jre -y
+
+sudo shutdown -r now
 EOL
 
 Vagrant.configure("2") do |config|
@@ -63,6 +72,19 @@ Vagrant.configure("2") do |config|
 
     #   # Customize the amount of memory on the VM:
     vb.memory = 4096
+
+    vb.customize [
+      "modifyvm"          , :id,
+      "--vram"            , "256",
+      "--clipboard"       , "bidirectional",
+      "--accelerate3d"    , "on",
+      "--hwvirtex"        , "on",
+      "--nestedpaging"    , "on",
+      "--largepages"      , "on",
+      "--ioapic"          , "on",
+      "--pae"             , "on",
+      "--paravirtprovider", "kvm",
+    ]
   end
 
   config.ssh.insert_key = false
